@@ -1,85 +1,94 @@
-import { Component, ElementRef, Input, ViewChild, OnInit, OnDestroy } from '@angular/core';
-import { MarketService } from '../market.service';
-import { SeriesResponse } from '../../shared/models/SeriesResponse.model';
+import { CommonModule } from '@angular/common';
+import {
+  Component,
+  ElementRef,
+  Input,
+  ViewChild,
+  OnInit,
+  OnDestroy,
+  OnChanges,
+  SimpleChanges,
+} from '@angular/core';
 import { Chart, registerables } from 'chart.js';
-import { Subscription, forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-chart',
   standalone: true,
-  imports: [],
+  imports: [CommonModule],
   templateUrl: './chart.component.html',
-  styleUrl: './chart.component.scss'
+  styleUrl: './chart.component.scss',
 })
+export class ChartComponent implements OnChanges {
+  @Input() x: string[] = [];
+  @Input() y: number[] = [];
+  @Input() title: string = '';
+  @Input() isLoading: boolean = false;
+  chart: any;
+  chartCtx: any;
 
-export class ChartComponent implements OnInit, OnDestroy {
-  private subscriptions: Subscription[] = []
-
-  constructor(private marketService: MarketService) {
-    Chart.register(...registerables)
+  constructor() {
+    Chart.register(...registerables);
   }
 
-  ngOnInit(): void {
-    this.marketService.getCurrentTime().subscribe(time => {
-      const ticker1Request$ = this.marketService.getSeries('SUPV', time)
-      const ticker2Request$ = this.marketService.getSeries('GGAL', time)
-      
-      this.subscriptions.push(
-        forkJoin([ticker1Request$, ticker2Request$]).subscribe(
-          ([t1Res, t2Res]) => {
-            if (t1Res.s === 'ok' && t2Res.s === 'ok') {
-              console.log('t1', t1Res.c)
-              console.log('t2', t2Res.c)
-              const ratio = t1Res.c.map((val, i) => val / t2Res.c[i])
-              console.log('ratio', ratio)
-              this.renderLineChart(t1Res.t, ratio)
-            }
-          }
-        )
-      )
-    })
+  ngOnInit() {
+    this.chartCtx = document.getElementById('chart') as HTMLCanvasElement;
   }
 
-  private renderLineChart(x: number[], y: number[]) {
+  ngOnChanges(): void {
+    this.renderLineChart();
+  }
+
+  private renderLineChart() {
+    if (this.chart) this.chart.destroy();
+
     const chartData = {
-      labels: x,
+      labels: this.x,
       datasets: [
         {
-          label: 'SUPV / GGAL',
-          data: y,
+          label: this.title,
+          data: this.y,
           fill: false,
-          borderColor: [
-            'rgb(54, 162, 235)',
-          ],
-          tension: 0.1
+          borderColor: ['rgb(54, 162, 235)'],
+          pointStyle: false as unknown as string,
+          tension: 0.1,
         },
         {
           label: 'Media',
-          data: new Array(y.length).fill(y.reduce((a, b) => a + b) / y.length),
+          data: new Array(this.y.length).fill(
+            this.y.reduce((a, b) => a + b) / this.y.length,
+          ),
           fill: false,
-          borderColor: 'rgb(255, 99, 132)'
-        }
-      ]
-    }
+          borderDash: [5, 5],
+          pointRadius: 0,
+          borderColor: 'rgb(255, 99, 132)',
+        },
+      ],
+    };
 
-    const ctx = document.getElementById('chart') as HTMLCanvasElement;
-
-    new Chart(ctx, {
+    this.chart = new Chart(this.chartCtx, {
       type: 'line',
       data: chartData,
       options: {
-        scales: {
+        scales: {},
+        plugins: {
+          legend: { display: false },
+          title: {
+            display: true,
+            text: this.title,
+            font: {
+              size: 20,
+            },
+          },
         },
-        interaction: {
-          intersect: false
+        layout: {
+          padding: {
+            left: 40,
+            right: 40,
+          },
         },
         responsive: true,
-        maintainAspectRatio: false
-      }
+        maintainAspectRatio: false,
+      },
     });
-  }
-  
-  ngOnDestroy(): void {
-    this.subscriptions.forEach((sub) => sub.unsubscribe());
   }
 }

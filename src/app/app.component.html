@@ -1,4 +1,7 @@
-<app-header></app-header>
-<app-form></app-form>
-<app-chart></app-chart>
-<app-footer></app-footer>
+<div class="h-full w-full flex-col">
+  <app-header></app-header>
+  <app-form (formChanged)="onFormChanged($event)"></app-form>
+  <app-chart [x]="x" [y]="y" [title]="chartTitle"></app-chart>
+  <app-spinner *ngIf="showSpinner"></app-spinner>
+  <app-footer></app-footer>
+</div>

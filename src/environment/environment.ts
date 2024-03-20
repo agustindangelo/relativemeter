@@ -1,6 +1,0 @@
-export const environment =  {
-  production: false,
-  BCRA_TOKEN: 'eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3Mzc4OTc2MDQsInR5cGUiOiJleHRlcm5hbCIsInVzZXIiOiJkYW5nZWxvYWd1c3RpbmFyaWVsQGdtYWlsLmNvbSJ9.2ZkVHMyM7A5rPAyGe1zwzQn2hAyRNNiD9AlNImqxW6KS0LQ4MRaSKqLqn3BeCA-aOGuj_bC-Vr_m59j0b8GWfw',
-  PPI_API_SECRET: 'NjA2MzFlYzgtZTgwZC00MDhiLWI5NzMtNTI3ZTE4NGE1ZmVj',
-  PPI_API_KEY: 'c0ZFbWQzeVloc1BSdjA0TmZ6OHQ: ',
-}
